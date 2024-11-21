@@ -1,57 +1,52 @@
-import express from "express";
+import express from "express"; // Importa o framework Express para criar a aplicação web
+import conectarAoBanco from "./src/config/dbConfig.js"; // Importa a função para conectar ao banco de dados (definida em dbConfig.js)
 
-const posts = [
-    {
-      id: 1,
-      descricao: "Uma foto teste",
-      imagem: "https://placecats.com/millie/300/150"
-    },
-    {
-      id: 2,
-      descricao: "Gato preguiçoso",
-      imagem: "https://placekitten.com/200/300"
-    },
-    {
-      id: 3,
-      descricao: "Gatinho curioso",
-      imagem: "https://placekitten.com/g/300/200"
-    },
-    {
-      id: 4,
-      descricao: "Gatos brincando",
-      imagem: "https://placekitten.com/400/300"
-    },
-    {
-      id: 5,
-      descricao: "Gatinho dormindo",
-      imagem: "https://placekitten.com/300/200"
-    },
-    {
-      id: 6,
-      descricao: "Gato com bola de lã",
-      imagem: "https://placekitten.com/200/200"
-    }
-  ];
+// Conecta ao banco de dados usando a string de conexão fornecida pela variável de ambiente STRING_CONEXAO
+const conexao = await conectarAoBanco(process.env.STRING_CONEXAO);
 
+// Array de posts de exemplo (será substituído pelos dados do banco de dados)
+// const posts = [
+//   // ... (objetos dos posts)
+// ];
+
+// Cria uma instância do Express
 const app = express();
+// Permite que o Express entenda requisições com formato JSON
 app.use(express.json());
-// servidore escutando na porta 3000
+
+// Inicia o servidor na porta 3000
 app.listen(3000, () => {
-    console.log("servidor escutando...");
+  console.log("servidor escutando...");
 });
 
-//  pegando algum recurso do servidor.
-app.get("/posts", (req, res) => {
-    res.status(200).json(posts);
-});
-
-function buscarPostPorID(id) {
-    return posts.findIndex((post) => {
-        return post.id === Number(id)
-    });
+// Função assíncrona para obter todos os posts do banco de dados
+async function getTodosPosts() {
+  // Seleciona o banco de dados "imersao-instabytes"
+  const db = conexao.db("imersao-instabytes");
+  // Seleciona a coleção "posts" dentro do banco de dados
+  const colecao = db.collection("posts");
+  // Retorna todos os documentos da coleção como um array
+  return colecao.find().toArray();
 }
 
-app.get("/posts/:id", (req, res) => {
-    const index = buscarPostPorID(req.params.id);
-    res.status(200).json(posts[index]);
+// Rota GET para obter todos os posts
+app.get("/posts", async (req, res) => {
+  // Chama a função para obter os posts do banco de dados
+  const resultadoPosts = await getTodosPosts();
+  // Envia os posts como resposta em formato JSON com status 200 (sucesso)
+  res.status(200).json(posts);
 });
+// app.get("/posts", (req, res) => {
+//     res.status(200).json(posts);
+// });
+
+// function buscarPostPorID(id) {
+//     return posts.findIndex((post) => {
+//         return post.id === Number(id)
+//     });
+// }
+
+// app.get("/posts/:id", (req, res) => {
+//     const index = buscarPostPorID(req.params.id);
+//     res.status(200).json(posts[index]);
+// });
