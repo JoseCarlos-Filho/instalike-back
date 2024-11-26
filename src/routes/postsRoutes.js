@@ -9,6 +9,8 @@ const routes = (app) => {
     app.get("/posts", listarPosts);
     // Rota para criar um post
     app.post("/posts", postarNovoPost);
+    app.post("/upload", upload.single("imagem"), uploadImagem);
+    app.put("/upload/:id", atualizarNovoPost);
 }
 
 export default routes;
